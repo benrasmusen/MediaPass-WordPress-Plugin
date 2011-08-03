@@ -26,6 +26,8 @@ Author URI: http://www.mediapass.com/
 
 require_once(WP_PLUGIN_DIR . "/" . basename(dirname(__FILE__)) . "/shortcodes.php");
 
+global $mp_plugin_name;
+$mp_plugin_name = 'mediapass';
 
 // check and clean current url
 function mp_set_http() {
@@ -168,7 +170,17 @@ function mp_page() {
 
 function mp_add_admin_panel(){
     
-    add_submenu_page('options-general.php', 'MediaPass', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
+    add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
+    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
+    add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
+}
+
+function mp_menu_account_info() {
+	include_once('includes/account_info.php');
+}
+
+function mp_menu_price_points() {
+	include_once('includes/price_points.php');
 }
 
 function mp_menu_default() {
