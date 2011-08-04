@@ -1,0 +1,19 @@
+img.mp-icon{
+	vertical-align: middle;
+}
+h2.header {
+	padding-top:3px;
+}
+div.wrap {
+	width:800px;
+}
+table#price-points {
+	margin:0 auto;
+	width:530px;
+}
+table#price-points tr th {
+	text-align:left;
+}
+table#price-points tr td {
+	padding:5px 0;
+}

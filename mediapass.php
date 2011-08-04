@@ -167,12 +167,25 @@ function mp_page() {
  }// end function
 */
 
+function mp_admin_init() {
+	global $mp_plugin_name;
+	wp_register_style( 'MPAdminStyles', WP_PLUGIN_URL . '/'.$mp_plugin_name.'/styles/admin.css' );
+	wp_register_script( 'MPAdminScripts', WP_PLUGIN_URL . '/'.$mp_plugin_name.'/js/admin.js' );
+}
+
+function mp_admin_enqueues() {
+	
+	wp_enqueue_script( 'MPAdminScripts' );
+	wp_enqueue_style( 'MPAdminStyles' );
+	
+}
 
 function mp_add_admin_panel(){
     
-    add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
+	add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
     add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
     add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
+
 }
 
 function mp_menu_account_info() {
@@ -208,3 +221,7 @@ add_action('init', 'mp_add_button');
 add_action('init', 'mp_newinitjson');
 
 add_action('admin_menu', 'mp_add_admin_panel');
+
+add_action( 'admin_init', 'mp_admin_init' );
+
+add_action( 'admin_print_styles', 'mp_admin_enqueues' );
