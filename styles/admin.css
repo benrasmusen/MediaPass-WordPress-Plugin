@@ -1,3 +1,4 @@
+/* Price Points Admin */
 img.mp-icon{
 	vertical-align: middle;
 }
@@ -16,4 +17,17 @@ table#price-points tr th {
 }
 table#price-points tr td {
 	padding:5px 0;
+}
+
+/* Account Info Admin */
+table#dynamic-variables {
+	border:1px solid #000;
+}
+table#dynamic-variables tr th {
+	text-align:left;
+}
+table#dynamic-variables tr td, 
+table#dynamic-variables tr th {
+	border:1px solid #000;
+	padding:5px;
 }

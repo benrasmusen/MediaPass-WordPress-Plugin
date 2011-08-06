@@ -83,14 +83,11 @@ function my_init_method() {
  // lets pull the json and set our options from the returned values
 function mp_newinitjson($safeurl) {
 
-	$url = 'http://api.mediapass.com/v1/Publisher/'. get_option('MP_installed_URL') . '?callback=';
-	//$request = new WP_Http;
-	//$result = $request->request($url);
+	$url = 'http://www.mediapassacademy.net/v1/Publisher/'. get_option('MP_installed_URL') . '?callback=';
+	$request = new WP_Http;
+	$result = $request->request($url);
 	
-	//$jsonstr = $result['body'];
-	
-	
-	$jsonstr = wp_remote_retrieve_body( wp_remote_get($url) );
+	$jsonstr = $result['body'];
 	
 	$json = str_replace("(","",str_replace(")","",$jsonstr));
 	$json_o=json_decode($json);
@@ -127,45 +124,18 @@ function mp_newinitjson($safeurl) {
  
 // check if installed domain matches the user account domain
 function check_mp_match() {
+	
 	$mp_user_ID = get_option('MP_user_ID');
 
 	if ($mp_user_ID == '0') {
 		add_action('admin_notices', 'mp_mismatch');
-	} else {
-		
 	}
-
+	
 }
 
 function mp_mismatch() {
-	echo "<div class='error'><p>The Web site you have installed the MediaPass plugin on doesn't have an associated MediaPass.com account. Please register at MediaPass.com or contact support@mediapass.com for help.</div>";
+	echo "<div class='error'><p>The Web site you have installed the MediaPass plugin on doesn't have an associated MediaPass.com account. Please <a href='admin.php?page=mediapass'>register here</a> or contact support@mediapass.com for help.</div>";
 }
-
-/*
-function mp_menu() {
-	        add_submenu_page('options-general.php', 'Media Pass', 'Media Pass', 'administrator', __FILE__, &$this, 'mp_page');
-}
-
-function mp_page() {
- 
-        echo '<div class="wrap">';
-        echo '<h2>'.__('Media Pass Settings').'</h2>';
-		?>
-        
-        <h3>User ID</h3>
-        <p><?php echo get_option('MP_user_ID'); ?></p>
-        <h4 />
-        <h3>Account URL</h3>
-        <p><?php echo get_option('MP_user_URL'); ?></p>
-        <h4 />        
-        <h3>Support</h3>
-        <p><a href="http://mediapass.com/support/plugins/wordpress/readme.txt">Readme.txt</a></p>
-        
-        <?php		
-        echo '</div>';
- 
- }// end function
-*/
 
 function mp_admin_init() {
 	global $mp_plugin_name;
@@ -181,11 +151,22 @@ function mp_admin_enqueues() {
 }
 
 function mp_add_admin_panel(){
-    
-	add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
-    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
-    add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
 
+	$mp_user_ID = get_option('MP_user_ID');
+	
+	if ($mp_user_ID != 0) {
+		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
+		add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
+	    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
+	    add_submenu_page('mediapass', 'MediaPass Benefits Logo', 'Benefits Logo', 'administrator', 'mediapass_benefits_logo','mp_menu_benefits_logo');
+	} else {
+		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_signup');
+	}
+
+}
+
+function mp_menu_signup() {
+	include_once('includes/signup.php');
 }
 
 function mp_menu_account_info() {
@@ -196,20 +177,12 @@ function mp_menu_price_points() {
 	include_once('includes/price_points.php');
 }
 
+function mp_menu_benefits_logo() {
+	include_once('includes/benefits_logo.php');
+}
+
 function mp_menu_default() {
-	$icon_path = get_option('siteurl').'/wp-content/plugins/'.basename(dirname(__FILE__)).'/js/images/mplogo.gif';
-	echo '<div class="wrap">';
-    echo '<h2><img src="' . $icon_path .'" height="24" width="24" />'.__('MediaPass Settings').'</h2>';
-    echo '    <h3>User ID</h3>';
-    echo '    <p>' . get_option('MP_user_ID') .'</p>';
-    echo '    <hr />';
-    echo '    <h3>Account URL</h3>';
-    echo '    <p>' .  get_option('MP_user_URL') .'</p>';
-    echo '    <hr />        ';
-    echo '    <h3>Support</h3>';
-    echo '    <p><a href="http://mediapass.com/support/plugins/wordpress/readme.txt">Readme.txt</a></p>';
-        	
-	echo '</div">';
+	include_once('includes/summary_report.php');
 }
  
 add_action('init', 'check_mp_match'); 
