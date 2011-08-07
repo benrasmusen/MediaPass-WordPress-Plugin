@@ -29,6 +29,9 @@ require_once(WP_PLUGIN_DIR . "/" . basename(dirname(__FILE__)) . "/shortcodes.ph
 global $mp_plugin_name;
 $mp_plugin_name = 'mediapass';
 
+global $mp_api_url;
+$mp_api_url = 'http://www.mediapassacademy.net/v1/';
+
 // check and clean current url
 function mp_set_http() {
 	$mp_base_url = split("/", site_url());
@@ -141,13 +144,22 @@ function mp_admin_init() {
 	global $mp_plugin_name;
 	wp_register_style( 'MPAdminStyles', WP_PLUGIN_URL . '/'.$mp_plugin_name.'/styles/admin.css' );
 	wp_register_script( 'MPAdminScripts', WP_PLUGIN_URL . '/'.$mp_plugin_name.'/js/admin.js' );
+	
+	if (!empty($_GET['page']) && $_GET['page'] == 'mediapass_benefits') {
+		wp_register_script( 'formfieldlimiter', WP_PLUGIN_URL.'/'.$mp_plugin_name. '/js/formfieldlimiter.js');
+	}
 }
 
 function mp_admin_enqueues() {
+	if (!empty($_GET['page']) && $_GET['page'] == 'mediapass_benefits') {
+		wp_enqueue_script('media-upload');
+		wp_enqueue_script('thickbox');
+		wp_enqueue_script( 'formfieldlimiter' );
+		wp_enqueue_style('thickbox');
+	}
 	
 	wp_enqueue_script( 'MPAdminScripts' );
 	wp_enqueue_style( 'MPAdminStyles' );
-	
 }
 
 function mp_add_admin_panel(){
@@ -158,7 +170,7 @@ function mp_add_admin_panel(){
 		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
 		add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
 	    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
-	    add_submenu_page('mediapass', 'MediaPass Benefits Logo', 'Benefits Logo', 'administrator', 'mediapass_benefits_logo','mp_menu_benefits_logo');
+	    add_submenu_page('mediapass', 'MediaPass Update Benefits', 'Update Benefits', 'administrator', 'mediapass_benefits','mp_menu_benefits');
 	} else {
 		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_signup');
 	}
@@ -177,12 +189,70 @@ function mp_menu_price_points() {
 	include_once('includes/price_points.php');
 }
 
-function mp_menu_benefits_logo() {
-	include_once('includes/benefits_logo.php');
+function mp_menu_benefits() {
+	
+	if (!empty($_POST)) {
+		echo "<pre>"; print_r ($_POST); die("</pre>");
+		$data = mp_api_call(array(
+			'method' => 'POST',
+			'action' => 'benefit',
+			'body' => array(
+				'Id' => (int) get_option('MP_user_ID'),
+				'Benefits' => $_POST['benefits']
+			)
+		));
+	} else {
+		$data = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'benefit',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	$data['Status'] = 'success';
+	if ($data['Status'] != 'fail') {
+		include_once('includes/benefits.php');
+	} else {
+		// error
+	}
 }
 
 function mp_menu_default() {
 	include_once('includes/summary_report.php');
+}
+
+function mp_api_call($options=array()) {
+	
+	global $mp_api_url;
+	
+	$headers = array(
+		'oauth_token' => 'CF852208-BD50-4A17-A753-ED3DC0E29666'
+	);
+	
+	$options = array_merge(
+		array(
+			'method' => 'GET',
+			'action' => null,
+			'params' => array(),
+			'body' => array()
+		),
+		(array) $options
+	);
+	
+	$request = new WP_Http;
+	$result = $request->request(
+		$mp_api_url . $options['action'] . '/' . implode('/', $options['params']),
+		array(
+			'method' => $options['method'],
+			'headers' => $headers,
+			'body' => json_encode($options['body']),
+		)
+	);
+	
+	return json_decode(str_replace("(","",str_replace(")", "", $result['body'])), true);
+	
 }
  
 add_action('init', 'check_mp_match'); 
