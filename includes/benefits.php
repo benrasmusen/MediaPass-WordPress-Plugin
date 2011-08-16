@@ -10,7 +10,7 @@ global $mp_plugin_name;
 	
 	<p>Upload a logo to customize the look and feel of your Page Overlay and Video Overlay subscription options. Your logo must be a jpg. See examples below.</p>
 	
-	<form name="benefits" action="" method="post" accept-charset="utf-8">
+	<form name="benefits" action="" method="post" accept-charset="utf-8" id="benefits-form">
 		
 		<table border="0" cellspacing="5" cellpadding="5">
 			<tr valign="top">
@@ -47,7 +47,7 @@ global $mp_plugin_name;
 		
 		<table border="0">
 			<tr>
-				<td colspan="2"><textarea name="benefits" rows="8" cols="100"></textarea></td>
+				<td colspan="2"><textarea name="benefits" rows="8" cols="100"><?php echo trim($benefits) ?></textarea></td>
 			</tr>
 			<tr>
 				<td>

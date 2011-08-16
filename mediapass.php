@@ -88,9 +88,14 @@ function mp_newinitjson($safeurl) {
 
 	$url = 'http://www.mediapassacademy.net/v1/Publisher/'. get_option('MP_installed_URL') . '?callback=';
 	$request = new WP_Http;
-	$result = $request->request($url);
+	// $result = $request->request($url);
+	$result = null;
 	
-	$jsonstr = $result['body'];
+	if (is_array($request)) {
+		$jsonstr = $result['body'];
+	} else {
+		$jsonstr = null;
+	}
 	
 	$json = str_replace("(","",str_replace(")","",$jsonstr));
 	$json_o=json_decode($json);
@@ -154,7 +159,7 @@ function mp_admin_enqueues() {
 	if (!empty($_GET['page']) && $_GET['page'] == 'mediapass_benefits') {
 		wp_enqueue_script('media-upload');
 		wp_enqueue_script('thickbox');
-		wp_enqueue_script( 'formfieldlimiter' );
+		wp_enqueue_script('formfieldlimiter');
 		wp_enqueue_style('thickbox');
 	}
 	
@@ -182,23 +187,130 @@ function mp_menu_signup() {
 }
 
 function mp_menu_account_info() {
-	include_once('includes/account_info.php');
+	
+	if (!empty($_POST)) {
+		$data = mp_api_call(array(
+			'method' => 'POST',
+			'action' => 'account',
+			'body' => array_merge(array(
+				'Id' => (int) get_option('MP_user_ID'),
+			), (array) $_POST)
+		));
+	} else {
+		$data = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'account',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	if ($data['Status'] == 'success') {
+		$data['Msg'];
+		include_once('includes/account_info.php');
+	} else {
+		$error = $data['Msg'];
+		include_once('includes/error.php');
+	}
+	
 }
 
 function mp_menu_price_points() {
-	include_once('includes/price_points.php');
+	
+	// Increment: 2592000 for month, 31104000 for year, 86400 for day.
+	// Type: 0 for memebership, 1 for single article
+	$increment_map = array(
+		'1mo' => array(
+			'Length' => 1,
+			'Increment' => 2592000
+		),
+		'3mo' => array(
+			'Length' => 3,
+			'Increment' => 2592000
+		),
+		'6mo' => array(
+			'Length' => 6,
+			'Increment' => 2592000
+		),
+		'1yr' => array(
+			'Length' => 1,
+			'Increment' => 31104000
+		)
+	);
+	
+	if (!empty($_POST)) {
+		
+		$price_model = array();
+		
+		switch ($_POST['subscription_model']) {
+			case 'membership':
+				foreach ($_POST['prices'] as $key => $price) {
+					$price_model[$key] = $increment_map[$price['pricing_period']];
+					$price_model[$key]['Price'] = $price['price'];
+					$price_model[$key]['Type'] = 0;
+				}
+				break;
+			
+			case 'single':
+				$price_model[] = array(
+					'Type' => 1,
+					'Length' => 1,
+					'Increment' => 31104000,
+					'Price' => $_POST['price']
+				);
+				break;
+		}
+		
+		$data = mp_api_call(array(
+			'method' => 'POST',
+			'action' => 'price',
+			'body' => array(
+				'Id' => (int) get_option('MP_user_ID'),
+				'PriceModel' => $price_model
+			)
+		));
+		
+	} else {
+		$data = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'price',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	if ($data['Status'] == 'success') {
+		$data = array(
+			'subscription_model' => (count($data['Msg']) > 1) ? 'membership' : 'single',
+			'prices' => $data['Msg']
+		);
+		include_once('includes/price_points.php');
+	} else {
+		$error = $data['Msg'];
+		include_once('includes/error.php');
+	}
 }
 
 function mp_menu_benefits() {
 	
 	if (!empty($_POST)) {
-		echo "<pre>"; print_r ($_POST); die("</pre>");
+		
+		if (!empty($_POST['upload_image'])) {
+			$pathinfo = pathinfo($_POST['upload_image']);
+			if ($pathinfo['extension'] == 'jpeg') {
+				$logo = $_POST['upload_image'];
+			}
+		}
+		
 		$data = mp_api_call(array(
 			'method' => 'POST',
 			'action' => 'benefit',
 			'body' => array(
 				'Id' => (int) get_option('MP_user_ID'),
-				'Benefits' => $_POST['benefits']
+				'Benefits' => $_POST['benefits'],
+				'Logo' => $lo
 			)
 		));
 	} else {
@@ -211,16 +323,62 @@ function mp_menu_benefits() {
 		));
 	}
 	
-	$data['Status'] = 'success';
 	if ($data['Status'] != 'fail') {
+		$benefits = $data['Msg'];
 		include_once('includes/benefits.php');
 	} else {
-		// error
+		$error = $data['Msg'];
+		include_once('includes/error.php');
 	}
+	
 }
 
 function mp_menu_default() {
-	include_once('includes/summary_report.php');
+	
+	if (!empty($_GET['period'])) {
+		$stats = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'report/summary/stats',
+			'params' => array(
+				get_option('MP_user_ID'),
+				$_GET['period']
+			)
+		));
+	} else {
+		$stats = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'report/summary/stats',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	$earning = mp_api_call(array(
+		'method' => 'GET',
+		'action' => 'report/summary/earning',
+		'params' => array(
+			get_option('MP_user_ID')
+		)
+	));
+	
+	if ($stats['Status'] == 'success' && $earning['Status']['success']) {
+		$data = array(
+			'stats' => $stats['Msg'],
+			'earning' => $earning['Msg']
+		);
+		include_once('includes/summary_report.php');
+	} else {
+		$error = "";
+		if ($stats['Status'] != 'success') {
+			$error .= $stats['Msg'];
+		}
+		if ($earning['Status'] != 'success') {
+			$error .= $earning['Msg'];
+		}
+		include_once('includes/error.php');
+	}
+	
 }
 
 function mp_api_call($options=array()) {

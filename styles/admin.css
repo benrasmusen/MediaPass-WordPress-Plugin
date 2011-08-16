@@ -31,3 +31,28 @@ table#dynamic-variables tr th {
 	border:1px solid #000;
 	padding:5px;
 }
+
+/* Summary Report */
+table#earning-summary,
+table#stats {
+	width:300px;
+	margin-bottom:20px;
+	border-bottom:1px solid #eee;
+}
+table#earning-summary {
+	margin-top:15px;
+}
+table#earning-summary tr th,
+table#stats tr th {
+	background-color:#eee;
+	padding:5px 15px;
+	text-align:left;
+}
+table#earning-summary tr td,
+table#stats tr td {
+	padding:5px 15px;
+}
+select#period {
+	height:auto;
+	padding:0;
+}
