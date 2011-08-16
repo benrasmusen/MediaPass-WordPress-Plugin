@@ -32,6 +32,12 @@ $mp_plugin_name = 'mediapass';
 global $mp_api_url;
 $mp_api_url = 'http://www.mediapassacademy.net/v1/';
 
+global $mp_auth_login_url;
+$mp_auth_login_url = 'http://www.mediapassacademy.net/Account/Auth/?scope=http://www.mediapassacademy.net/auth.html&response_type=token';
+
+global $mp_auth_register_url;
+$mp_auth_register_url = 'http://www.mediapassacademy.net/Account/AuthRegister/?scope=http://www.mediapassacademy.net/auth.html&response_type=token';
+
 // check and clean current url
 function mp_set_http() {
 	$mp_base_url = split("/", site_url());
@@ -169,9 +175,18 @@ function mp_admin_enqueues() {
 
 function mp_add_admin_panel(){
 
+	// Save oAuth return values
+	if (!empty($_GET['access_token']) && !empty($_GET['refresh_token']) && !empty($_GET['id'])) {
+		update_option( 'MP_access_token', $_GET['access_token'], '', 'yes' );
+		update_option( 'MP_refresh_token', $_GET['refresh_token'], '', 'yes' );
+		update_option( 'MP_user_ID', $_GET['id'], '', 'yes' );
+	}
+
 	$mp_user_ID = get_option('MP_user_ID');
+	$mp_access_token = get_option('MP_access_token');
+	$mp_refresh_token = get_option('MP_refresh_token');
 	
-	if ($mp_user_ID != 0) {
+	if ($mp_user_ID != 0 && $mp_refresh_token != 0 && $mp_access_token !== 0) {
 		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_default');
 		add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
 	    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
@@ -183,6 +198,8 @@ function mp_add_admin_panel(){
 }
 
 function mp_menu_signup() {
+	global $mp_auth_register_url;
+	global $mp_auth_login_url;
 	include_once('includes/signup.php');
 }
 
@@ -300,7 +317,14 @@ function mp_menu_benefits() {
 		if (!empty($_POST['upload_image'])) {
 			$pathinfo = pathinfo($_POST['upload_image']);
 			if ($pathinfo['extension'] == 'jpeg') {
-				$logo = $_POST['upload_image'];
+				mp_api_call(array(
+					'method' => 'GET',
+					'action' => 'logo',
+					'params' => array(
+						get_option('MP_user_ID'),
+						'?url=' . $_POST['upload_image']
+					),
+				));
 			}
 		}
 		
@@ -309,8 +333,7 @@ function mp_menu_benefits() {
 			'action' => 'benefit',
 			'body' => array(
 				'Id' => (int) get_option('MP_user_ID'),
-				'Benefits' => $_POST['benefits'],
-				'Logo' => $lo
+				'Benefits' => $_POST['benefits']
 			)
 		));
 	} else {
@@ -386,7 +409,7 @@ function mp_api_call($options=array()) {
 	global $mp_api_url;
 	
 	$headers = array(
-		'oauth_token' => 'CF852208-BD50-4A17-A753-ED3DC0E29666'
+		'oauth_token' => get_option('MP_access_token')
 	);
 	
 	$options = array_merge(
