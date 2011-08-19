@@ -3,7 +3,7 @@
 global $mp_plugin_name; 
 
 ?>
-<div class="wrap">
+<div class="mp-wrap">
 	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/js/images/mplogo.gif' ?>" class="mp-icon"> Update Account Information</h2>
 	<form action="" method="post" accept-charset="utf-8">
 		<table border="0" cellspacing="0" cellpadding="0" class="form-table">

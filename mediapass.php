@@ -29,14 +29,17 @@ require_once(WP_PLUGIN_DIR . "/" . basename(dirname(__FILE__)) . "/shortcodes.ph
 global $mp_plugin_name;
 $mp_plugin_name = 'mediapass';
 
+global $mp_client_id;
+$mp_client_id = '7480FECEA20C3338C950F885BFA148C9';
+
 global $mp_api_url;
 $mp_api_url = 'http://www.mediapassacademy.net/v1/';
 
 global $mp_auth_login_url;
-$mp_auth_login_url = 'http://www.mediapassacademy.net/Account/Auth/?scope=http://www.mediapassacademy.net/auth.html&response_type=token';
+$mp_auth_login_url = 'http://www.mediapassacademy.net/Account/Auth/?client_id=' . $mp_client_id . '&scope=http://www.mediapassacademy.net/auth.html&response_type=token';
 
 global $mp_auth_register_url;
-$mp_auth_register_url = 'http://www.mediapassacademy.net/Account/AuthRegister/?scope=http://www.mediapassacademy.net/auth.html&response_type=token';
+$mp_auth_register_url = 'http://www.mediapassacademy.net/Account/AuthRegister/?' . $mp_client_id . '&scope=http://www.mediapassacademy.net/auth.html&response_type=token';
 
 // check and clean current url
 function mp_set_http() {
@@ -208,7 +211,7 @@ function mp_menu_account_info() {
 	if (!empty($_POST)) {
 		$data = mp_api_call(array(
 			'method' => 'POST',
-			'action' => 'account',
+			'action' => 'Account',
 			'body' => array_merge(array(
 				'Id' => (int) get_option('MP_user_ID'),
 			), (array) $_POST)
@@ -216,7 +219,7 @@ function mp_menu_account_info() {
 	} else {
 		$data = mp_api_call(array(
 			'method' => 'GET',
-			'action' => 'account',
+			'action' => 'Account',
 			'params' => array(
 				get_option('MP_user_ID')
 			)
@@ -316,19 +319,19 @@ function mp_menu_benefits() {
 		
 		if (!empty($_POST['upload_image'])) {
 			$pathinfo = pathinfo($_POST['upload_image']);
-			if ($pathinfo['extension'] == 'jpeg') {
-				mp_api_call(array(
-					'method' => 'GET',
+			if (in_array($pathinfo['extension'], array('jpg', 'jpeg'))) {
+				$logo = mp_api_call(array(
+					'method' => 'POST',
 					'action' => 'logo',
-					'params' => array(
-						get_option('MP_user_ID'),
-						'?url=' . $_POST['upload_image']
+					'body' => array(
+						'Id' => get_option('MP_user_ID'),
+						'Url' => $_POST['upload_image']
 					),
 				));
 			}
 		}
 		
-		$data = mp_api_call(array(
+		$benefit = mp_api_call(array(
 			'method' => 'POST',
 			'action' => 'benefit',
 			'body' => array(
@@ -337,17 +340,29 @@ function mp_menu_benefits() {
 			)
 		));
 	} else {
-		$data = mp_api_call(array(
+		$benefit = mp_api_call(array(
 			'method' => 'GET',
 			'action' => 'benefit',
 			'params' => array(
 				get_option('MP_user_ID')
 			)
 		));
+		$logo = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'logo',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
 	}
-	
+	$data = array(
+		'Status' => $benefit['Status'],
+		'Msg' => array(
+			'benefit' => $benefit['Msg'],
+			'logo' => $logo['Msg']
+		)
+	);
 	if ($data['Status'] != 'fail') {
-		$benefits = $data['Msg'];
 		include_once('includes/benefits.php');
 	} else {
 		$error = $data['Msg'];

@@ -3,7 +3,7 @@
 global $mp_plugin_name; 
 
 ?>
-<div class="wrap">
+<div class="mp-wrap">
 	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/js/images/mplogo.gif' ?>" class="mp-icon"> Update Benefits</h2>
 	
 	<h3>Benefits Logo</h3>
@@ -21,6 +21,16 @@ global $mp_plugin_name;
 					<input id="upload_image_button" type="button" value="Upload Image" />
 					<br />Enter an URL or upload an image for the logo.
 					</label>
+				</td>
+			</tr>
+			<tr>
+				<th>Current Logo</th>
+				<td>
+					<?php if (!empty($data['Msg']['logo']) && $data['Msg']['logo'] != 'logo is not saved.'): ?>
+						<img src="<?php echo $data['Msg']['logo'] ?>" />
+					<?php else: ?>
+						None
+					<?php endif ?>
 				</td>
 			</tr>
 		</table>
@@ -47,7 +57,7 @@ global $mp_plugin_name;
 		
 		<table border="0">
 			<tr>
-				<td colspan="2"><textarea name="benefits" rows="8" cols="100"><?php echo trim($benefits) ?></textarea></td>
+				<td colspan="2"><textarea name="benefits" rows="8" cols="100"><?php echo trim($data['Msg']['benefit']) ?></textarea></td>
 			</tr>
 			<tr>
 				<td>

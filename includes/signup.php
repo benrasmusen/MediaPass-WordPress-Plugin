@@ -5,7 +5,7 @@ global $mp_plugin_name;
 // TODO: implement $mp_auth_register_url/$mp_auth_login_url
 
 ?>
-<div class="wrap">
+<div class="mp-wrap">
 	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/js/images/mplogo.gif' ?>" class="mp-icon"> Signup</h2>
 	
 	<h3>Create an account in just a few minutes...</h3>
