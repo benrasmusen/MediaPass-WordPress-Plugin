@@ -1,11 +1,6 @@
-<?php 
-
-global $mp_plugin_name; 
-
-?>
 <div class="mp-wrap">
 	
-	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/js/images/mplogo.gif' ?>" class="mp-icon"> Price Point Configuration</h2>
+	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.MP_PLUGIN_NAME.'/js/images/mplogo.gif' ?>" class="mp-icon"> Price Point Configuration</h2>
 
 	<p>Set up Pricing to get started.</p>
 

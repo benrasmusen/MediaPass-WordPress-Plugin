@@ -1,10 +1,5 @@
-<?php 
-
-global $mp_plugin_name; 
-
-?>
 <div class="mp-wrap">
-	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/js/images/mplogo.gif' ?>" class="mp-icon"> Update Benefits</h2>
+	<h2 class="header"><img width="24" height="24" src="<?php echo get_option('siteurl').'/wp-content/plugins/'.MP_PLUGIN_NAME.'/js/images/mplogo.gif' ?>" class="mp-icon"> Update Benefits</h2>
 	
 	<h3>Benefits Logo</h3>
 	
@@ -41,7 +36,7 @@ global $mp_plugin_name;
 		<table border="0">
 			<tr>
 				<td valign="top" width="175"><strong>Your logo <br/>on Page Overlay option</strong></td>
-				<td><img src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/images/update-logo-inPage.jpg'?>" width="436" height="246" alt="Update Logo InPage"></td>
+				<td><img src="<?php echo get_option('siteurl').'/wp-content/plugins/'.MP_PLUGIN_NAME.'/images/update-logo-inPage.jpg'?>" width="436" height="246" alt="Update Logo InPage"></td>
 			</tr>
 		</table>
 	
@@ -72,11 +67,11 @@ global $mp_plugin_name;
 	<table border="0">
 		<tr>
 			<td valign="middle" width="175"><strong>Benefits Text <br/>on Page Overlay option</strong></td>
-			<td><img src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/images/benefits-pageOverlay.jpg'?>" alt="Overlay Benefits Text" style="padding-left:15px;"></td>
+			<td><img src="<?php echo get_option('siteurl').'/wp-content/plugins/'.MP_PLUGIN_NAME.'/images/benefits-pageOverlay.jpg'?>" alt="Overlay Benefits Text" style="padding-left:15px;"></td>
 		</tr>
 		<tr>
 			<td valign="middle" width="175"><strong>Benefits Text <br/>on In-Page option</strong></td>
-			<td><img src="<?php echo get_option('siteurl').'/wp-content/plugins/'.$mp_plugin_name.'/images/benefits-inpage.jpg'?>" alt="In Page Benefits Text"></td>
+			<td><img src="<?php echo get_option('siteurl').'/wp-content/plugins/'.MP_PLUGIN_NAME.'/images/benefits-inpage.jpg'?>" alt="In Page Benefits Text"></td>
 		</tr>
 	</table>
 	

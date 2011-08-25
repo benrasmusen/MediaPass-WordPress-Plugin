@@ -26,20 +26,12 @@ Author URI: http://www.mediapass.com/
 
 require_once(WP_PLUGIN_DIR . "/" . basename(dirname(__FILE__)) . "/shortcodes.php");
 
-global $mp_plugin_name;
-$mp_plugin_name = 'mediapass';
-
-global $mp_client_id;
-$mp_client_id = '7480FECEA20C3338C950F885BFA148C9';
-
-global $mp_api_url;
-$mp_api_url = 'http://www.mediapassacademy.net/v1/';
-
-global $mp_auth_login_url;
-$mp_auth_login_url = 'http://www.mediapassacademy.net/Account/Auth/?client_id=' . $mp_client_id . '&scope=http://www.mediapassacademy.net/auth.html&response_type=token';
-
-global $mp_auth_register_url;
-$mp_auth_register_url = 'http://www.mediapassacademy.net/Account/AuthRegister/?' . $mp_client_id . '&scope=http://www.mediapassacademy.net/auth.html&response_type=token';
+define('MP_PLUGIN_NAME', 'mediapass');
+define('MP_CLIENT_ID', '7480FECEA20C3338C950F885BFA148C9');
+define('MP_API_URL', 'http://www.mediapassacademy.net/v1/');
+define('MP_AUTH_LOGIN_URL', 'http://www.mediapassacademy.net/Account/Auth/?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
+define('MP_AUTH_REGISTER_URL', 'http://www.mediapassacademy.net/Account/AuthRegister/?'.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
+define('MP_FAQ_FEED_URL', 'http://mymediapass.com/wordpress/2011/06/faq/feed/?withoutcomments=1');
 
 // check and clean current url
 function mp_set_http() {
@@ -151,16 +143,16 @@ function check_mp_match() {
 }
 
 function mp_mismatch() {
-	echo "<div class='error'><p>The Web site you have installed the MediaPass plugin on doesn't have an associated MediaPass.com account. Please <a href='admin.php?page=mediapass'>register here</a> or contact support@mediapass.com for help.</div>";
+	echo "<div class='error'><p>The Web site you have installed the MediaPass plugin on doesn't have an associated MediaPass.com account. Please <a href='admin.php?page=mediapass'>connect your account here</a> or contact support@mediapass.com for help.</div>";
 }
 
 function mp_admin_init() {
-	global $mp_plugin_name;
-	wp_register_style( 'MPAdminStyles', WP_PLUGIN_URL . '/'.$mp_plugin_name.'/styles/admin.css' );
-	wp_register_script( 'MPAdminScripts', WP_PLUGIN_URL . '/'.$mp_plugin_name.'/js/admin.js' );
+	
+	wp_register_style( 'MPAdminStyles', WP_PLUGIN_URL . '/'.MP_PLUGIN_NAME.'/styles/admin.css' );
+	wp_register_script( 'MPAdminScripts', WP_PLUGIN_URL . '/'.MP_PLUGIN_NAME.'/js/admin.js' );
 	
 	if (!empty($_GET['page']) && $_GET['page'] == 'mediapass_benefits') {
-		wp_register_script( 'formfieldlimiter', WP_PLUGIN_URL.'/'.$mp_plugin_name. '/js/formfieldlimiter.js');
+		wp_register_script( 'formfieldlimiter', WP_PLUGIN_URL.'/'.MP_PLUGIN_NAME. '/js/formfieldlimiter.js');
 	}
 }
 
@@ -194,6 +186,8 @@ function mp_add_admin_panel(){
 		add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
 	    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
 	    add_submenu_page('mediapass', 'MediaPass Update Benefits', 'Update Benefits', 'administrator', 'mediapass_benefits','mp_menu_benefits');
+	    add_submenu_page('mediapass', 'MediaPass FAQs, Terms and Conditions', 'FAQs', 'administrator', 'mediapass_faqs_tc','mp_menu_faqs_tc');
+	    add_submenu_page('mediapass', 'MediaPass eCPM Floor', 'eCPM Floor', 'administrator', 'mediapass_ecpm_floor','mp_menu_ecpm_floor');
 	} else {
 		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_signup');
 	}
@@ -201,8 +195,6 @@ function mp_add_admin_panel(){
 }
 
 function mp_menu_signup() {
-	global $mp_auth_register_url;
-	global $mp_auth_login_url;
 	include_once('includes/signup.php');
 }
 
@@ -227,7 +219,7 @@ function mp_menu_account_info() {
 	}
 	
 	if ($data['Status'] == 'success') {
-		$data['Msg'];
+		$data = $data['Msg'];
 		include_once('includes/account_info.php');
 	} else {
 		$error = $data['Msg'];
@@ -287,6 +279,7 @@ function mp_menu_price_points() {
 			'action' => 'price',
 			'body' => array(
 				'Id' => (int) get_option('MP_user_ID'),
+				'Active' => 1,
 				'PriceModel' => $price_model
 			)
 		));
@@ -419,9 +412,47 @@ function mp_menu_default() {
 	
 }
 
-function mp_api_call($options=array()) {
+function mp_menu_faqs_tc() {
 	
-	global $mp_api_url;
+	include_once(ABSPATH . WPINC . '/feed.php');
+	$faq_feed = fetch_feed(MP_FAQ_FEED_URL);
+	if (!is_wp_error($faq_feed)) {
+		$faq_items = $faq_feed->get_items(0, $faq_feed->get_item_quantity(5));
+	}
+	include_once('includes/faq_tc.php');
+}
+
+function mp_menu_ecpm_floor() {
+	
+	if (!empty($_POST)) {
+		$data = mp_api_call(array(
+			'method' => 'POST',
+			'action' => 'ecpm',
+			'params' => array(
+				get_option('MP_user_ID'),
+				$_POST['ecpm_floor']
+			)
+		));
+	} else {
+		$data = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'ecpm',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	if ($data['Status'] == 'success') {
+		$data = $data['Msg'];
+		include_once('includes/ecpm_floor.php');
+	} else {
+		$error = $data['Msg'];
+		include_once('includes/error.php');
+	}
+}
+
+function mp_api_call($options=array()) {
 	
 	$headers = array(
 		'oauth_token' => get_option('MP_access_token')
@@ -439,7 +470,7 @@ function mp_api_call($options=array()) {
 	
 	$request = new WP_Http;
 	$result = $request->request(
-		$mp_api_url . $options['action'] . '/' . implode('/', $options['params']),
+		MP_API_URL . $options['action'] . '/' . implode('/', $options['params']),
 		array(
 			'method' => $options['method'],
 			'headers' => $headers,
