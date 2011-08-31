@@ -31,6 +31,8 @@ define('MP_CLIENT_ID', '7480FECEA20C3338C950F885BFA148C9');
 define('MP_API_URL', 'http://www.mediapassacademy.net/v1/');
 define('MP_AUTH_LOGIN_URL', 'http://www.mediapassacademy.net/Account/Auth/?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
 define('MP_AUTH_REGISTER_URL', 'http://www.mediapassacademy.net/Account/AuthRegister/?'.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
+define('MP_AUTH_REFRESH_URL', 'http://www.mediapassacademy.net/oauth/refresh?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&grant_type=refresh_token&redirect_uri=');
+
 define('MP_FAQ_FEED_URL', 'http://mymediapass.com/wordpress/2011/06/faq/feed/?withoutcomments=1');
 
 // check and clean current url
@@ -148,12 +150,44 @@ function mp_mismatch() {
 
 function mp_admin_init() {
 	
+	mp_check_auth_status();
+	
 	wp_register_style( 'MPAdminStyles', WP_PLUGIN_URL . '/'.MP_PLUGIN_NAME.'/styles/admin.css' );
 	wp_register_script( 'MPAdminScripts', WP_PLUGIN_URL . '/'.MP_PLUGIN_NAME.'/js/admin.js' );
 	
 	if (!empty($_GET['page']) && $_GET['page'] == 'mediapass_benefits') {
 		wp_register_script( 'formfieldlimiter', WP_PLUGIN_URL.'/'.MP_PLUGIN_NAME. '/js/formfieldlimiter.js');
 	}
+}
+
+function mp_check_auth_status() {
+	
+	if (!empty($_GET['page']) && $_GET['page'] == MP_PLUGIN_NAME) {
+		
+		$mp_user_ID = get_option('MP_user_ID');
+		$mp_access_token = get_option('MP_access_token');
+		$mp_refresh_token = get_option('MP_refresh_token');
+
+		if ($mp_user_ID != 0 && $mp_refresh_token != 0 && $mp_access_token !== 0) {
+
+			$response = mp_api_call(array(
+				'method' => 'GET',
+				'action' => 'Account',
+				'params' => array(
+					get_option('MP_user_ID')
+				)
+			));
+			
+			if ($response['Msg'] == 'HTTP Error 401 Unauthorized') {
+				$refresh_redirect = MP_AUTH_REFRESH_URL . urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://www." . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) . '&refresh_token=' . $mp_refresh_token;
+				wp_redirect($refresh_redirect);
+				exit;
+			}
+
+		}
+		
+	}
+
 }
 
 function mp_admin_enqueues() {
@@ -478,7 +512,9 @@ function mp_api_call($options=array()) {
 		)
 	);
 	
-	return json_decode(str_replace("(","",str_replace(")", "", $result['body'])), true);
+	$response = json_decode(str_replace("(","",str_replace(")", "", $result['body'])), true);
+	
+	return $response;
 	
 }
  

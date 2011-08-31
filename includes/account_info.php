@@ -75,7 +75,7 @@
 			        <td>##SubAffiliateID##</td>
 			        <td>The Sub AffiliateID if available</td>
 			    </tr>
-		</tbody>
+			</tbody>
 		</table>
 		<p><input type="submit" value="Update Account"></p>
 	</form>
