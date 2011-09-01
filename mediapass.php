@@ -32,6 +32,7 @@ define('MP_API_URL', 'http://www.mediapassacademy.net/v1/');
 define('MP_AUTH_LOGIN_URL', 'http://www.mediapassacademy.net/Account/Auth/?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
 define('MP_AUTH_REGISTER_URL', 'http://www.mediapassacademy.net/Account/AuthRegister/?'.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
 define('MP_AUTH_REFRESH_URL', 'http://www.mediapassacademy.net/oauth/refresh?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&grant_type=refresh_token&redirect_uri=');
+define('MP_AUTH_DEAUTH_URL', 'http://www.mediapassacademy.net/oauth/unauthorize?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&redirect_uri=');
 
 define('MP_FAQ_FEED_URL', 'http://mymediapass.com/wordpress/2011/06/faq/feed/?withoutcomments=1');
 
@@ -142,6 +143,10 @@ function check_mp_match() {
 		add_action('admin_notices', 'mp_mismatch');
 	}
 	
+	if (!empty($_GET['deauthed'])) {
+		add_action('admin_notices', 'mp_deauthed_message');
+	}
+	
 }
 
 function mp_mismatch() {
@@ -162,6 +167,17 @@ function mp_admin_init() {
 
 function mp_check_auth_status() {
 	
+	// De-authorize account if requested
+	if (!empty($_GET['deauth'])) {
+		
+		delete_option('MP_user_ID');
+		delete_option('MP_access_token');
+		delete_option('MP_refresh_token');
+		
+		wp_redirect(MP_AUTH_DEAUTH_URL.urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].'/wp-admin/admin.php?page=mediapass'));
+		
+	}
+	
 	if (!empty($_GET['page']) && $_GET['page'] == MP_PLUGIN_NAME) {
 		
 		$mp_user_ID = get_option('MP_user_ID');
@@ -179,7 +195,7 @@ function mp_check_auth_status() {
 			));
 			
 			if ($response['Msg'] == 'HTTP Error 401 Unauthorized') {
-				$refresh_redirect = MP_AUTH_REFRESH_URL . urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://www." . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) . '&refresh_token=' . $mp_refresh_token;
+				$refresh_redirect = MP_AUTH_REFRESH_URL . urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) . '&refresh_token=' . $mp_refresh_token;
 				wp_redirect($refresh_redirect);
 				exit;
 			}
@@ -220,12 +236,25 @@ function mp_add_admin_panel(){
 		add_submenu_page('mediapass', 'MediaPass Account Information', 'Account Info', 'administrator', 'mediapass_accountinfo','mp_menu_account_info');
 	    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
 	    add_submenu_page('mediapass', 'MediaPass Update Benefits', 'Update Benefits', 'administrator', 'mediapass_benefits','mp_menu_benefits');
+		add_submenu_page('mediapass', 'MediaPass eCPM Floor', 'eCPM Floor', 'administrator', 'mediapass_ecpm_floor','mp_menu_ecpm_floor');
 	    add_submenu_page('mediapass', 'MediaPass FAQs, Terms and Conditions', 'FAQs', 'administrator', 'mediapass_faqs_tc','mp_menu_faqs_tc');
-	    add_submenu_page('mediapass', 'MediaPass eCPM Floor', 'eCPM Floor', 'administrator', 'mediapass_ecpm_floor','mp_menu_ecpm_floor');
+	    add_submenu_page('mediapass', 'De-authorize MediaPass Account', 'De-Authorize', 'administrator', 'mediapass_deauth','mp_deauth');
 	} else {
 		add_menu_page('MediaPass General Information', 'MediaPass', 'administrator', 'mediapass','mp_menu_signup');
 	}
 
+}
+
+function mp_deauthed_message() {
+	echo "<div class='error'><p>You have successfully de-authorized this plugin and unlinked your MediaPass account.</p></div>";
+}
+
+function mp_deauth() {	
+	echo '<div class="mp-wrap">';
+	echo 	'<h2 class="header"><img width="24" height="24" src="'.get_option('siteurl').'/wp-content/plugins/'.MP_PLUGIN_NAME.'/js/images/mplogo.gif" class="mp-icon"> De-Authorize Plugin</h2>';
+	echo 	'<p>Are you sure you want to de-authorize this plugin?</p>';
+	echo  	'<p><a href="'.$_SERVER['REQUEST_URI'].'&deauth=true">Click here to de-authorize this plugin and unlink your MediaPass account.</a></p>';
+	echo '</div>';
 }
 
 function mp_menu_signup() {
