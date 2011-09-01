@@ -8,12 +8,12 @@
 	
 	<h3>Create an account in just a few minutes...</h3>
 	
-	<p>No credit card required. No technical expertise needed. Go live in just a few minutes! <a href="<?php echo MP_AUTH_REGISTER_URL . urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) ?>">Click here to get started!</a></p>
+	<p>No credit card required. No technical expertise needed. Go live in just a few minutes! <a href="<?php echo MP_AUTH_REGISTER_URL . urlencode("http" . (($_SERVER['HTTPS'] == 'on') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) ?>">Click here to get started!</a></p>
 	
 	<hr/>
 	
 	<h3>Already have an account?</h3>
 	
-	<p><a href="<?php echo MP_AUTH_LOGIN_URL . urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) ?>">Authorize your account now!</a></p>
+	<p><a href="<?php echo MP_AUTH_LOGIN_URL . urlencode("http" . (($_SERVER['HTTPS'] == 'on') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) ?>">Authorize your account now!</a></p>
 	
 </div>

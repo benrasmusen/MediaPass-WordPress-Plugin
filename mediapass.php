@@ -195,7 +195,7 @@ function mp_check_auth_status() {
 			));
 			
 			if ($response['Msg'] == 'HTTP Error 401 Unauthorized') {
-				$refresh_redirect = MP_AUTH_REFRESH_URL . urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) . '&refresh_token=' . $mp_refresh_token;
+				$refresh_redirect = MP_AUTH_REFRESH_URL . urlencode("http" . (($_SERVER['HTTPS'] == 'on') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']) . '&refresh_token=' . $mp_refresh_token;
 				wp_redirect($refresh_redirect);
 				exit;
 			}
