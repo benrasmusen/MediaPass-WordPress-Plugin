@@ -174,7 +174,7 @@ function mp_check_auth_status() {
 		delete_option('MP_access_token');
 		delete_option('MP_refresh_token');
 		
-		wp_redirect(MP_AUTH_DEAUTH_URL.urlencode("http" . (($_SERVER['HTTPS'] != 'off') ? "s" : null) . "://" . $_SERVER['SERVER_NAME'].'/wp-admin/admin.php?page=mediapass'));
+		wp_redirect(MP_AUTH_DEAUTH_URL.urlencode(admin_url() . 'admin.php?page=mediapass'));
 		
 	}
 	
