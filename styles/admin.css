@@ -56,3 +56,24 @@ select#period {
 	height:auto;
 	padding:0;
 }
+
+/* Network Sites */
+table#network-sites {
+	border-collapse: collapse;
+	border-top:1px solid #ccc;
+	border-right:1px solid #ccc;
+	width:100%;
+}
+
+table#network-sites th {
+	padding: 5px;
+	text-align: left;
+	border-bottom: 1px solid #CCC;
+	border-left:1px solid #ccc;
+}
+
+table#network-sites td {
+	padding: 5px;
+	border-bottom: 1px solid #CCC;
+	border-left:1px solid #ccc;
+}

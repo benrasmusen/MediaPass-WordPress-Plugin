@@ -237,6 +237,8 @@ function mp_add_admin_panel(){
 	    add_submenu_page('mediapass', 'MediaPass Price Points', 'Price Points', 'administrator', 'mediapass_pricepoints','mp_menu_price_points');
 	    add_submenu_page('mediapass', 'MediaPass Update Benefits', 'Update Benefits', 'administrator', 'mediapass_benefits','mp_menu_benefits');
 		add_submenu_page('mediapass', 'MediaPass eCPM Floor', 'eCPM Floor', 'administrator', 'mediapass_ecpm_floor','mp_menu_ecpm_floor');
+		add_submenu_page('mediapass', 'MediaPass Metered Settings', 'Metered Settings', 'administrator', 'mediapass_metered_settings','mp_menu_metered');
+		add_submenu_page('mediapass', 'MediaPass Network Settings', 'Network Settings', 'administrator', 'mediapass_network_settings','mp_menu_network');
 	    add_submenu_page('mediapass', 'MediaPass FAQs, Terms and Conditions', 'FAQs', 'administrator', 'mediapass_faqs_tc','mp_menu_faqs_tc');
 	    add_submenu_page('mediapass', 'De-authorize MediaPass Account', 'De-Authorize', 'administrator', 'mediapass_deauth','mp_deauth');
 	} else {
@@ -427,6 +429,70 @@ function mp_menu_benefits() {
 	
 }
 
+function mp_menu_metered() {
+	
+	if (!empty($_POST)) {
+		$data = mp_api_call(array(
+			'method' => 'POST',
+			'action' => 'metered',
+			'body' => array(
+				'Id' => (int) get_option('MP_user_ID'),
+				'Status' => $_POST['Status'],
+				'Count' => $_POST['Count']
+			)
+		));
+	} else {
+		$data = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'metered',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	if ($data['Status'] != 'fail') {
+		include_once('includes/metered.php');
+	} else {
+		$error = $data['Msg'];
+		include_once('includes/error.php');
+	}
+	
+}
+
+function mp_menu_network() {
+	
+	if (!empty($_POST)) {
+		
+		$data = mp_api_call(array(
+			'method' => 'POST',
+			'action' => 'network/list',
+			'body' => array(
+				'Id' => (int) get_option('MP_user_ID'),
+				'Title' => $_POST['Title'],
+				'Domain' => $_POST['Domain'],
+				'BackLink' => $_POST['BackLink']
+			)
+		));
+	} else {
+		$data = mp_api_call(array(
+			'method' => 'GET',
+			'action' => 'network/list',
+			'params' => array(
+				get_option('MP_user_ID')
+			)
+		));
+	}
+	
+	if ($data['Status'] != 'fail') {
+		include_once('includes/network.php');
+	} else {
+		$error = $data['Msg'];
+		include_once('includes/error.php');
+	}
+	
+}
+
 function mp_menu_default() {
 	
 	if (!empty($_GET['period'])) {
@@ -541,7 +607,11 @@ function mp_api_call($options=array()) {
 		)
 	);
 	
-	$response = json_decode(str_replace("(","",str_replace(")", "", $result['body'])), true);
+	if (is_array($result)) {
+		$response = json_decode(str_replace("(","",str_replace(")", "", $result['body'])), true);
+	} else {
+		$response['Status'] = 'fail';
+	}
 	
 	return $response;
 	
