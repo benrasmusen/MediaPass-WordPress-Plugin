@@ -10,7 +10,7 @@
 	
 	<div id="subscription-model">
 		<label for="subscription-model">My Subscription Model:</label>
-		<select name="subscription_model" id="subscription-model">
+		<select name="subscription_model" id="subscription-model" style="width:165px;">
 			<option value="membership"<?php echo ($data['subscription_model'] == 'membership') ? ' selected="selected"' : null ?>>Membership Access</option>
 			<option value="single"<?php echo ($data['subscription_model'] == 'single') ? ' selected="selected"' : null ?>>Single Article Access</option>
 		</select>
@@ -32,7 +32,7 @@
 				
 				<tr>
 					<td>
-						<select name="prices[<?php echo $i ?>][pricing_period]" id="pricing-period-<?php echo $i ?>">
+						<select name="prices[<?php echo $i ?>][pricing_period]" id="pricing-period-<?php echo $i ?>" style="width:90px;">
 							<?php
 							$options = array(
 								'1mo' => array(

@@ -45,38 +45,6 @@
 				</tr>
 			</tbody>
 		</table>
-		<br/>
-		<table cellspacing="0" cellpadding="0" id="dynamic-variables">
-		    <tbody>
-				<tr>
-			        <th colspan="2">List of Dynamic Variables</th>
-			    </tr>
-			    <tr>
-			        <td>##OrderNumber##</td>
-			        <td>The order number of the sale</td>
-			    </tr>
-			    <tr>
-			        <td>##SaleAmount##</td>
-			        <td>The amount of the sale</td>
-			    </tr>
-			    <tr>
-			        <td>##Commission##</td>
-			        <td>The affiliate commission</td>
-			    </tr>
-			    <tr>
-			        <td>##SalesID##</td>
-			        <td>The Affiliate Wiz internal Sale ID</td>
-			    </tr>
-			    <tr>
-			        <td>##Tier##</td>
-			        <td>The commission Tier</td>
-			    </tr>
-			    <tr>
-			        <td>##SubAffiliateID##</td>
-			        <td>The Sub AffiliateID if available</td>
-			    </tr>
-			</tbody>
-		</table>
 		<p><input type="submit" value="Update Account"></p>
 	</form>
 </div>

@@ -30,7 +30,7 @@ define('MP_PLUGIN_NAME', 'mediapass');
 define('MP_CLIENT_ID', '7480FECEA20C3338C950F885BFA148C9');
 define('MP_API_URL', 'http://www.mediapassacademy.net/v1/');
 define('MP_AUTH_LOGIN_URL', 'http://www.mediapassacademy.net/Account/Auth/?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
-define('MP_AUTH_REGISTER_URL', 'http://www.mediapassacademy.net/Account/AuthRegister/?'.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
+define('MP_AUTH_REGISTER_URL', 'http://www.mediapassacademy.net/Account/AuthRegister/?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&response_type=token&redirect_uri=');
 define('MP_AUTH_REFRESH_URL', 'http://www.mediapassacademy.net/oauth/refresh?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&grant_type=refresh_token&redirect_uri=');
 define('MP_AUTH_DEAUTH_URL', 'http://www.mediapassacademy.net/oauth/unauthorize?client_id='.MP_CLIENT_ID.'&scope=http://www.mediapassacademy.net/auth.html&redirect_uri=');
 
@@ -170,7 +170,7 @@ function mp_check_auth_status() {
 	// De-authorize account if requested
 	if (!empty($_GET['deauth'])) {
 		
-		delete_option('MP_user_ID');
+		delete_option('MP_user_number');
 		delete_option('MP_access_token');
 		delete_option('MP_refresh_token');
 		
@@ -180,7 +180,7 @@ function mp_check_auth_status() {
 	
 	if (!empty($_GET['page']) && $_GET['page'] == MP_PLUGIN_NAME) {
 		
-		$mp_user_ID = get_option('MP_user_ID');
+		$mp_user_ID = get_option('MP_user_number');
 		$mp_access_token = get_option('MP_access_token');
 		$mp_refresh_token = get_option('MP_refresh_token');
 
@@ -190,7 +190,7 @@ function mp_check_auth_status() {
 				'method' => 'GET',
 				'action' => 'Account',
 				'params' => array(
-					get_option('MP_user_ID')
+					get_option('MP_user_number')
 				)
 			));
 			
@@ -224,10 +224,10 @@ function mp_add_admin_panel(){
 	if (!empty($_GET['access_token']) && !empty($_GET['refresh_token']) && !empty($_GET['id'])) {
 		update_option( 'MP_access_token', $_GET['access_token'], '', 'yes' );
 		update_option( 'MP_refresh_token', $_GET['refresh_token'], '', 'yes' );
-		update_option( 'MP_user_ID', $_GET['id'], '', 'yes' );
+		update_option( 'MP_user_number', $_GET['id'], '', 'yes' );
 	}
 
-	$mp_user_ID = get_option('MP_user_ID');
+	$mp_user_ID = get_option('MP_user_number');
 	$mp_access_token = get_option('MP_access_token');
 	$mp_refresh_token = get_option('MP_refresh_token');
 	
@@ -270,7 +270,7 @@ function mp_menu_account_info() {
 			'method' => 'POST',
 			'action' => 'Account',
 			'body' => array_merge(array(
-				'Id' => (int) get_option('MP_user_ID'),
+				'Id' => (int) get_option('MP_user_number'),
 			), (array) $_POST)
 		));
 	} else {
@@ -278,7 +278,7 @@ function mp_menu_account_info() {
 			'method' => 'GET',
 			'action' => 'Account',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
@@ -343,7 +343,7 @@ function mp_menu_price_points() {
 			'method' => 'POST',
 			'action' => 'price',
 			'body' => array(
-				'Id' => (int) get_option('MP_user_ID'),
+				'Id' => (int) get_option('MP_user_number'),
 				'Active' => 1,
 				'PriceModel' => $price_model
 			)
@@ -354,7 +354,7 @@ function mp_menu_price_points() {
 			'method' => 'GET',
 			'action' => 'price',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
@@ -382,7 +382,7 @@ function mp_menu_benefits() {
 					'method' => 'POST',
 					'action' => 'logo',
 					'body' => array(
-						'Id' => get_option('MP_user_ID'),
+						'Id' => get_option('MP_user_number'),
 						'Url' => $_POST['upload_image']
 					),
 				));
@@ -393,7 +393,7 @@ function mp_menu_benefits() {
 			'method' => 'POST',
 			'action' => 'benefit',
 			'body' => array(
-				'Id' => (int) get_option('MP_user_ID'),
+				'Id' => (int) get_option('MP_user_number'),
 				'Benefits' => $_POST['benefits']
 			)
 		));
@@ -402,14 +402,14 @@ function mp_menu_benefits() {
 			'method' => 'GET',
 			'action' => 'benefit',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 		$logo = mp_api_call(array(
 			'method' => 'GET',
 			'action' => 'logo',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
@@ -436,7 +436,7 @@ function mp_menu_metered() {
 			'method' => 'POST',
 			'action' => 'metered',
 			'body' => array(
-				'Id' => (int) get_option('MP_user_ID'),
+				'Id' => (int) get_option('MP_user_number'),
 				'Status' => $_POST['Status'],
 				'Count' => $_POST['Count']
 			)
@@ -446,7 +446,7 @@ function mp_menu_metered() {
 			'method' => 'GET',
 			'action' => 'metered',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
@@ -468,7 +468,7 @@ function mp_menu_network() {
 			'method' => 'POST',
 			'action' => 'network/list',
 			'body' => array(
-				'Id' => (int) get_option('MP_user_ID'),
+				'Id' => (int) get_option('MP_user_number'),
 				'Title' => $_POST['Title'],
 				'Domain' => $_POST['Domain'],
 				'BackLink' => $_POST['BackLink']
@@ -479,7 +479,7 @@ function mp_menu_network() {
 			'method' => 'GET',
 			'action' => 'network/list',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
@@ -500,7 +500,7 @@ function mp_menu_default() {
 			'method' => 'GET',
 			'action' => 'report/summary/stats',
 			'params' => array(
-				get_option('MP_user_ID'),
+				get_option('MP_user_number'),
 				$_GET['period']
 			)
 		));
@@ -509,7 +509,7 @@ function mp_menu_default() {
 			'method' => 'GET',
 			'action' => 'report/summary/stats',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
@@ -518,7 +518,7 @@ function mp_menu_default() {
 		'method' => 'GET',
 		'action' => 'report/summary/earning',
 		'params' => array(
-			get_option('MP_user_ID')
+			get_option('MP_user_number')
 		)
 	));
 	
@@ -558,7 +558,7 @@ function mp_menu_ecpm_floor() {
 			'method' => 'POST',
 			'action' => 'ecpm',
 			'params' => array(
-				get_option('MP_user_ID'),
+				get_option('MP_user_number'),
 				$_POST['ecpm_floor']
 			)
 		));
@@ -567,7 +567,7 @@ function mp_menu_ecpm_floor() {
 			'method' => 'GET',
 			'action' => 'ecpm',
 			'params' => array(
-				get_option('MP_user_ID')
+				get_option('MP_user_number')
 			)
 		));
 	}
