@@ -58,13 +58,68 @@
 							);
 							?>
 							<?php foreach ($options as $key => $value): ?>
-								<option value="<?php echo $key ?>"<?php echo ($data['subscription_model'] == 'membership' && !empty($data['prices'][$i]) && $data['prices'][$i]['Increment'] == $value['Increment'] && $data['prices'][$i]['Length'] == $value['Length']) ? ' selected="selected"' : null ?>><?php echo $value['Label'] ?></option>
+								<?php
+									$selected = null;
+									if ($data['subscription_model'] == 'membership') {
+										if (!empty($data['prices'][$i]) && 
+											$data['prices'][$i]['Increment'] == $value['Increment'] && 
+											$data['prices'][$i]['Length'] == $value['Length']
+											) {
+											$selected = ' selected="selected"';
+										}
+									} else {
+										// Defaults
+										switch ($i) {
+											case 0:
+												if ($key == '1mo') {
+													$selected = ' selected="selected"';
+												}
+												break;
+											case 1:
+												if ($key == '6mo') {
+													$selected = ' selected="selected"';
+												}
+												break;
+											case 2:
+												if ($key == '1yr') {
+													$selected = ' selected="selected"';
+												}
+												break;											
+											default:
+												$price = null;
+												break;
+										}
+									}
+								?>
+								<option value="<?php echo $key ?>"<?php echo $selected ?>><?php echo $value['Label'] ?></option>
 							<?php endforeach ?>
 						</select>
 						<label for="pricing-period">Membership at</label>
 					</td>
 					<td>
-						$<input type="text" name="prices[<?php echo $i ?>][price]" value="<?echo ($data['subscription_model'] == 'membership') ? $data['prices'][$i]['Price'] : null; ?>" id="price-<?php echo $i ?>"> per month
+						<?php
+						$price = null;
+						if ($data['subscription_model'] == 'membership') {
+							$price = $data['prices'][$i]['Price'];
+						} else {
+							// Defaults
+							switch ($i) {
+								case 0:
+									$price = "9.95";
+									break;
+								case 1:
+									$price = "7.95";
+									break;
+								case 2:
+									$price = "4.95";
+									break;											
+								default:
+									$price = null;
+									break;
+							}
+						}
+						?>
+						$<input type="text" name="prices[<?php echo $i ?>][price]" value="<?php echo $price; ?>" id="price-<?php echo $i ?>"> per month
 					</td>
 				</tr>
 				
