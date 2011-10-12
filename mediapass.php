@@ -92,8 +92,7 @@ function mp_newinitjson($safeurl) {
 
 	$url = 'http://www.mediapassacademy.net/v1/Publisher/'. get_option('MP_installed_URL') . '?callback=';
 	$request = new WP_Http;
-	// $result = $request->request($url);
-	$result = null;
+	$result = $request->request($url);
 	
 	if (is_array($request)) {
 		$jsonstr = $result['body'];
