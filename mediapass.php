@@ -94,7 +94,7 @@ function mp_newinitjson($safeurl) {
 	$request = new WP_Http;
 	$result = $request->request($url);
 	
-	if (is_array($request)) {
+	if (is_array($result)) {
 		$jsonstr = $result['body'];
 	} else {
 		$jsonstr = null;
