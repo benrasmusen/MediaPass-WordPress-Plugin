@@ -596,13 +596,20 @@ function mp_api_call($options=array()) {
 		(array) $options
 	);
 	
+	$body = json_encode($options['body']);
+	
+	// Remove escaped slashes from request of submitting a logo URL
+	if (isset($options['body']['Url'])) {
+		$body = stripslashes($body);
+	}
+	
 	$request = new WP_Http;
 	$result = $request->request(
 		MP_API_URL . $options['action'] . '/' . implode('/', $options['params']),
 		array(
 			'method' => $options['method'],
 			'headers' => $headers,
-			'body' => json_encode($options['body']),
+			'body' => $body
 		)
 	);
 	
