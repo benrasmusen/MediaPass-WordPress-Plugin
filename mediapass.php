@@ -38,7 +38,7 @@ define('MP_FAQ_FEED_URL', 'http://mymediapass.com/wordpress/2011/06/faq/feed/?wi
 
 // check and clean current url
 function mp_set_http() {
-	$mp_base_url = split("/", site_url());
+	$mp_base_url = explode("/", site_url());
     $mp_strip_endurl = $mp_base_url[0] ."//". $mp_base_url[2];
 	$mp_str_url = str_replace(array('http://','https://'), '', $mp_strip_endurl);
 	// check if option exists
